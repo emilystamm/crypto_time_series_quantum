@@ -8,7 +8,7 @@ Cryptocurrencies are notoriously volatile and challenging to predict, however, t
 The models use 6 logicial qubits, and could run on IonQ, Rigetti, or simulators. 
 
 ### Data
-The data used is the price of the Ethereum cryptocurrency 2015 - 2021, including the Open, High, Low, Close, Adjusted Close, and Volume for each day. The dataset used is (Kaggle Ethereum Data - Arpit Verma)[https://www.kaggle.com/varpit94/ethereum-data].
+The data used is the price of the Ethereum cryptocurrency 2015 - 2021, including the Open, High, Low, Close, Adjusted Close, and Volume for each day. The dataset used is [Kaggle Ethereum Data - Arpit Verma](https://www.kaggle.com/varpit94/ethereum-data).
 
 ### Libraries
 Libraries used include:
