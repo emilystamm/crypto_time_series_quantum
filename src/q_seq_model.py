@@ -53,6 +53,7 @@ class QSequenceCryptoTimeSeriesModel(CryptoTimeSeriesModel):
         logger.debug("X {}\ny {}".format(X, y))
         predictions_arr = np.array([qml.math.to_numpy(self.circuit(inputs=x, weights=weights)) for x in X])
         predictions = []
+        # TODO: update this 
         for x in range(predictions_arr.shape[0]):
             x_arr = 0
             for i in range(predictions_arr.shape[1]):
