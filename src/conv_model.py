@@ -69,7 +69,7 @@ class ConvCryptoTimeSeriesModel(CryptoTimeSeriesModel):
 
     def train(self) -> None:
         logger.info("Begin training.")
-        start = time.time() # Start Timer
+        start = time.time() 
         for epoch in range(self.epochs):
             batch_index = np.random.randint(0, self.y_train.shape[0], (self.batch_size))
             X_batch = self.X_train[batch_index]
@@ -82,18 +82,18 @@ class ConvCryptoTimeSeriesModel(CryptoTimeSeriesModel):
             loss.backward()
             self.optimizer.step()
         self.train_loss = loss.detach().numpy()
-        self.train_time = time.time() - start # Finish timing 
+        self.train_time = time.time() - start 
         logger.debug("Loss: {}".format(loss))
 
     def test(self) -> None:
         logger.info("Begin testing.")
-        start = time.time() # Start Timer
+        start = time.time() 
         self.y_pred = self.forward(self.X_test)
         self.y_data_predict = self.y_pred.data.numpy() 
         self.y_data_test = self.y_test.data.numpy()
         self.test_loss = self.criterion(self.y_pred, self.y_test).detach().numpy()
         logger.info("Test Loss: {}".format(self.test_loss))
-        self.test_time = time.time() - start # Finish timing 
+        self.test_time = time.time() - start 
 
         logger.debug("Test {}\nPredict{}".format(self.y_data_test, self.y_data_predict))
         logger.debug("Test {}\nPredict{}".format(self.y_data_test.shape, self.y_data_predict.shape))

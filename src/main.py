@@ -28,13 +28,13 @@ if __name__ == "__main__":
         model.plot(plotfile=plotfile)
 
     model = QSequenceCryptoTimeSeriesModel(
-            num_train = 800, 
-            num_test = 400,
-            epochs = 1000,
+            num_train = 20, 
+            num_test = 10,
+            epochs = 4,
             lr = .005,
-            batch_size = 25,
-            start_index = 100,
-            lookback = 14
+            batch_size = 5,
+            start_index = 0,
+            lookback = 3
     )
 
     model.read(datafile,index_col)
@@ -43,5 +43,5 @@ if __name__ == "__main__":
     model.train()
     model.test()
     model.write(writefile=writefile)
-    plotfile = "{}_class_{}_ex_3.png".format("qcircuit", model.y_col)
+    plotfile = "{}_class_{}_ex_4.png".format("qcircuit", model.y_col)
     model.plot(plotfile=plotfile)

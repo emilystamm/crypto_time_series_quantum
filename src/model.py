@@ -19,9 +19,6 @@ logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-num_qubits = 6
-dev = qml.device("default.qubit.torch", wires=num_qubits)
-
 
 class CryptoTimeSeriesModel(nn.Module):
     def __init__(self,
@@ -50,7 +47,6 @@ class CryptoTimeSeriesModel(nn.Module):
         data_raw = self.df.to_numpy() # convert to numpy array
         data = []
         
-        # create all possible sequences of length seq_len
         for index in range(len(data_raw) - self.lookback): 
             data.append(data_raw[index: index + self.lookback])
         

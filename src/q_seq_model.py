@@ -18,7 +18,10 @@ from utils import square_loss
 
 
 num_qubits = 6
-dev = qml.device("default.qubit.torch", wires=num_qubits, shots=1000)
+# dev = qml.device("default.qubit.torch", wires=num_qubits, shots=1000)
+s3 = ("emily-braket-qhack", "test")
+device_arn="arn:aws:braket:::device/quantum-simulator/amazon/sv1"
+dev = qml.device("braket.aws.qubit",device_arn = device_arn, s3_destination_folder=s3, wires=num_qubits, shots=1)
 
 
 class QSequenceCryptoTimeSeriesModel(CryptoTimeSeriesModel):
