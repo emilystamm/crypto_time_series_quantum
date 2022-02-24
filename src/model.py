@@ -92,8 +92,8 @@ class CryptoTimeSeriesModel(nn.Module):
         y_test_2 = Variable(Tensor(self.y_test_1))
         
         # Used for CNN (+ Q)
-        self.X_train = reshape(X_train_2, (X_train_2.shape[0], X_train_2.shape[2] * X_train_2.shape[1], 1))
-        self.X_test = reshape(X_test_2, (X_test_2.shape[0], X_test_2.shape[2] * X_test_2.shape[1], 1))
+        self.X_train = reshape(X_train_2, (X_train_2.shape[0],1, X_train_2.shape[2] * X_train_2.shape[1]))
+        self.X_test = reshape(X_test_2, (X_test_2.shape[0], 1, X_test_2.shape[2] * X_test_2.shape[1]))
         self.y_train = reshape(Variable(Tensor([y_train_2[i,self.y_col] for i in range(y_train_2.shape[0])])), (y_train_2.shape[0], 1))
         self.y_test = reshape(Variable(Tensor([y_test_2[i,self.y_col] for i in range(y_test_2.shape[0])])), (y_test_2.shape[0], 1))
 
@@ -101,6 +101,8 @@ class CryptoTimeSeriesModel(nn.Module):
         self.y_train_1 = reshape(Variable(Tensor([self.y_train[i,self.y_col] for i in range(self.y_train.shape[0])])), (self.y_train.shape[0],))
         self.y_test_1 = reshape(Variable(Tensor([self.y_test[i,self.y_col] for i in range(self.y_test.shape[0])])), (self.y_test.shape[0],))
      
+  
+
     '''
     Write
     write loss, timings, and some parameter choices to file  
