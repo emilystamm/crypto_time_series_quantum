@@ -70,12 +70,14 @@ class CryptoTimeSeriesModel(nn.Module):
         # y shape: (number of datapoints, number of columns)
         X = np.array(data)[:, :-1, :]
         y = np.array(data)[:, -1, :]
+        y = np.array([elt[y_col] for elt in y]).reshape(y.shape[0], 1)
         logger.debug("X shape {}, y shape {}".format(X.shape, y.shape))
 
         # Data transformation
         logger.info("Transform data.")
         self.mm = MinMaxScaler() 
         self.ss = StandardScaler() 
+        X = np.array([self.ss.fit_transform(x) for x in X])
         y = self.mm.fit_transform(y)
   
         # Split into train and test
@@ -94,15 +96,12 @@ class CryptoTimeSeriesModel(nn.Module):
         # Used for CNN (+ Q)
         self.X_train = reshape(X_train_2, (X_train_2.shape[0],1, X_train_2.shape[2] * X_train_2.shape[1]))
         self.X_test = reshape(X_test_2, (X_test_2.shape[0], 1, X_test_2.shape[2] * X_test_2.shape[1]))
-        self.y_train = reshape(Variable(Tensor([y_train_2[i,self.y_col] for i in range(y_train_2.shape[0])])), (y_train_2.shape[0], 1))
-        self.y_test = reshape(Variable(Tensor([y_test_2[i,self.y_col] for i in range(y_test_2.shape[0])])), (y_test_2.shape[0], 1))
-
+        self.y_train = y_train_2
+        self.y_test = y_test_2
+        
         # Used for q sequential model 
-        self.y_train_1 = reshape(Variable(Tensor([self.y_train[i,self.y_col] for i in range(self.y_train.shape[0])])), (self.y_train.shape[0],))
-        self.y_test_1 = reshape(Variable(Tensor([self.y_test[i,self.y_col] for i in range(self.y_test.shape[0])])), (self.y_test.shape[0],))
-     
-  
-
+        self.y_train_1 = reshape(Variable(Tensor(self.y_train)), (self.y_train.shape[0],1))
+        self.y_test_1 = reshape(Variable(Tensor(self.y_test)), (self.y_test.shape[0],1))
     '''
     Write
     write loss, timings, and some parameter choices to file  
@@ -125,9 +124,15 @@ class CryptoTimeSeriesModel(nn.Module):
     def plot(self, plotfile) -> None:
         full_plotfile= "../plots/" + plotfile
         logger.info("Plotting results and saving to {}".format(full_plotfile))
+        # Revert transformation 
+        self.invtransformed_y_test = self.mm.inverse_transform(
+            reshape(Variable(Tensor(self.y_data_test)),  (self.y_data_test.shape[0], 1)))
+        self.invtransformed_y_predict = self.mm.inverse_transform(
+            reshape(Variable(Tensor(self.y_data_predict)),  (self.y_data_predict.shape[0], 1)))
+        # Plot 
         plt.figure(figsize=(10,6)) 
-        plt.plot(self.y_data_test, label='Actual Data')
-        plt.plot(self.y_data_predict, label='Predicted Data') 
+        plt.plot(self.invtransformed_y_test, label='Actual Data')
+        plt.plot(self.invtransformed_y_predict, label='Predicted Data') 
         plt.title('Crypto Time-Series Prediction\nLoss: {}'.format(round(float(self.test_loss),7)), fontsize=14)
         plt.savefig(full_plotfile)
 
