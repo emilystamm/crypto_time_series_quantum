@@ -21,30 +21,29 @@ class ConvCryptoTimeSeriesModel(CryptoTimeSeriesModel):
     Init
     '''
     def __init__(self,
-        num_train, num_test, epochs, lr, batch_size,start_index, lookback
+        num_train, num_test, epochs, lr, batch_size,start_index, lookback, conv = None, quantum = None
     ) -> None:
         super(ConvCryptoTimeSeriesModel, self).__init__(num_train, num_test, epochs, lr, batch_size,start_index, lookback)
+        self.conv = conv
+        self.quantum = quantum
+        if self.quantum: self.type =  "CNN_Quantum"
+        else: self.type = "CNN"
     '''
     Initialize Layers 
     '''
-    def initialize_layers(self, conv = None, quantum = None):
-        logger.info("Initializing layers.")
-        # Set type
-        if quantum: self.type =  "CNN+Quantum"
-        else: self.type = "CNN"
+    def initialize_layers(self, ):
+        logger.info("Initializing layers.")        
         # Set quantum and convolutional parameters
         self.input_channels, self.output_size = 6*(self.lookback- 1), 1 # Conv: Set input / output size 
         self.num_layers = 5 # Q: Set number of layers
         weight_shapes = {"weights": (self.num_layers, num_qubits, 3)} # Q: parameters for entangle layers
-        self.conv = conv # Conv: Set conv channel sizes
-        self.quantum = quantum  # If True, use quantum layer 
         # Create layers for neural network 
         self.relu = nn.ReLU(inplace=True)
         self.conv1 = nn.Conv1d(
-            in_channels=1, out_channels=conv[0], kernel_size=6, stride=6, padding=5, bias=True
+            in_channels=1, out_channels=self.conv[0], kernel_size=6, stride=6, padding=5, bias=True
         )
         self.pool1 = nn.MaxPool1d(self.lookback)
-        self.fc1 = nn.Linear(conv[0], 6)
+        self.fc1 = nn.Linear(self.conv[0], 6)
         # Quantum layer
         if self.quantum: 
             self.qlayer = qml.qnn.TorchLayer(qnode = self.circuit, weight_shapes = weight_shapes)

@@ -34,12 +34,6 @@ class QSequenceCryptoTimeSeriesModel(CryptoTimeSeriesModel):
         # self.optimizer = optimize.AdamOptimizer(stepsize=.02) 
         self.optimizer = optimize.NesterovMomentumOptimizer(stepsize=0.01, momentum=0.9)
         self.type = "QuantumSequenceCircuit"
-
-    def initialize(self):
-        self.X_train = self.X_train_1
-        self.X_test = self.X_test_1
-        self.y_train = self.y_train_1
-        self.y_test = self.y_test_1
         self.num_layers = 1
 
 
@@ -73,8 +67,15 @@ class QSequenceCryptoTimeSeriesModel(CryptoTimeSeriesModel):
             predictions += [x_arr] 
         return predictions
 
+    def set_data_sample(self):     
+        self.X_train = self.X_train_1
+        self.X_test = self.X_test_1
+        self.y_train = self.y_train_1
+        self.y_test = self.y_test_1
 
     def train(self) -> None:
+        self.set_data_sample()
+
         logger.info("Begin training.")
         start = time.time() 
         # Weights (lookback - 1, num_layers, num_qubits, 3)

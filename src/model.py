@@ -48,6 +48,8 @@ class CryptoTimeSeriesModel(nn.Module):
         full_datafile = "../data/" + datafile
         logger.info("Reading in data from file {}".format(full_datafile))
         self.df = pd.read_csv(full_datafile, index_col = index_col, parse_dates=True)
+        self.dates = pd.read_csv(full_datafile)["Date"][self.start_index + self.num_train: self.start_index + self.num_train + self.num_test]
+
 
     '''
     Preprocess
@@ -119,20 +121,28 @@ class CryptoTimeSeriesModel(nn.Module):
             ]
             writer.writerow(row)
     '''
-    Plot
+    Inverse transform of y 
     '''
-    def plot(self, plotfile) -> None:
-        full_plotfile= "../plots/" + plotfile
-        logger.info("Plotting results and saving to {}".format(full_plotfile))
+    def invtransform_y(self):
         # Revert transformation 
         self.invtransformed_y_test = self.mm.inverse_transform(
             reshape(Variable(Tensor(self.y_data_test)),  (self.y_data_test.shape[0], 1)))
         self.invtransformed_y_predict = self.mm.inverse_transform(
             reshape(Variable(Tensor(self.y_data_predict)),  (self.y_data_predict.shape[0], 1)))
+        return self.invtransformed_y_test, self.invtransformed_y_predict
+    '''
+    Plot
+    '''
+    def plot(self, plotfile, y_preds = {}) -> None:
+        full_plotfile= "../plots/" + plotfile
+        logger.info("Plotting results and saving to {}".format(full_plotfile))
         # Plot 
         plt.figure(figsize=(10,6)) 
-        plt.plot(self.invtransformed_y_test, label='Actual Data')
-        plt.plot(self.invtransformed_y_predict, label='Predicted Data') 
+        plt.plot(self.dates, self.invtransformed_y_test, label='Actual Data')
+        plt.plot(self.dates, self.invtransformed_y_predict, label='{} Predicted Data'.format(self.type))
+        for y_pred_type in y_preds.keys():
+            plt.plot(self.dates, y_preds[y_pred_type], label='{} Predicted Data'.format(y_pred_type))
+        plt.legend()
         plt.title('Crypto Time-Series Prediction\nLoss: {}'.format(round(float(self.test_loss),7)), fontsize=14)
         plt.savefig(full_plotfile)
 
