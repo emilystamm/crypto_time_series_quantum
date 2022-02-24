@@ -36,4 +36,6 @@ Libraries used include:
 * https://arxiv.org/abs/2006.14619
 * https://controlandlearning.wordpress.com/2020/07/26/pytorch-basics-1d-convolution/
 * https://cnvrg.io/pytorch-lstm/
+* https://towardsdatascience.com/pytorch-lstms-for-time-series-data-cd16190929d7
+* https://www.kdnuggets.com/2020/07/pytorch-lstm-text-generation-tutorial.html
 * https://medium.com/swlh/stock-price-prediction-with-pytorch-37f52ae84632
