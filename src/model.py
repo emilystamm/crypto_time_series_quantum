@@ -1,12 +1,11 @@
 import csv
-import time 
+import time
 
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import pennylane as qml
 from pennylane import QNode
-from pennylane.templates import AngleEmbedding, StronglyEntanglingLayers
 
 import torch 
 import torch.nn as nn
@@ -19,13 +18,19 @@ logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
+global num_qubits
+num_qubits = 6
 
 class CryptoTimeSeriesModel(nn.Module):
+    '''
+    Init
+    '''
     def __init__(self,
         num_train, num_test, epochs, lr, batch_size,start_index, lookback
     ) -> None:
         logger.info("Initialize model.")
         super(CryptoTimeSeriesModel, self).__init__()
+        # Initialize 
         self.num_train = num_train
         self.num_test = num_test
         self.epochs = epochs
@@ -35,57 +40,71 @@ class CryptoTimeSeriesModel(nn.Module):
         self.start_index = start_index
         self.lookback= lookback
 
+    '''
+    Read
+    read data from file
+    '''
     def read(self, datafile, index_col):
         full_datafile = "../data/" + datafile
         logger.info("Reading in data from file {}".format(full_datafile))
         self.df = pd.read_csv(full_datafile, index_col = index_col, parse_dates=True)
 
+    '''
+    Preprocess
+    format as sequences, split into train and test, and transformation of datapoints 
+    '''
     def preprocess(self, y_col):
         logger.info("Preprocessing data.")
         self.y_col = y_col
 
-        data_raw = self.df.to_numpy() # convert to numpy array
+        # Reshape data into sequences
+        # Old shape: (number of datapoints, number of columns)
+        # New shape: (len(raw_data)-lookback), lookback - 1, number of columns)
+        raw_data = self.df.to_numpy() 
         data = []
+        for index in range(len(raw_data) - self.lookback): 
+            data.append(raw_data[index: index + self.lookback])
         
-        for index in range(len(data_raw) - self.lookback): 
-            data.append(data_raw[index: index + self.lookback])
-        
-        self.df = data
-
-        self.mm = MinMaxScaler() 
-        self.ss = StandardScaler() 
-        logger.info("Transform data.")
-
-        logger.info("Split data into train and test. Training (testing) data size: {} ({}).".format(self.num_train, self.num_test))
-       
+        # Split into X and y 
+        # X shape: (number of datapoints, lookback - 1, number of columns)
+        # y shape: (number of datapoints, number of columns)
         X = np.array(data)[:, :-1, :]
         y = np.array(data)[:, -1, :]
+        logger.debug("X shape {}, y shape {}".format(X.shape, y.shape))
 
+        # Data transformation
+        logger.info("Transform data.")
+        self.mm = MinMaxScaler() 
+        self.ss = StandardScaler() 
         y = self.mm.fit_transform(y)
   
-    
-        self.X_train_orig = X[self.start_index:self.start_index+self.num_train, :] 
-        self.X_test_orig = X[self.start_index+self.num_train:self.start_index +self.num_train + self.num_test, :]
-        self.y_train_orig = y[self.start_index:self.start_index+self.num_train, :]
-        self.y_test_orig = y[self.start_index+self.num_train:self.start_index+self.num_train + self.num_test, :]
+        # Split into train and test
+        logger.info("Split data into train and test. Training (testing) data size: {} ({}).".format(self.num_train, self.num_test))       
+        self.X_train_1 = X[self.start_index:self.start_index+self.num_train, :] 
+        self.X_test_1 = X[self.start_index+self.num_train:self.start_index +self.num_train + self.num_test, :]
+        self.y_train_1 = y[self.start_index:self.start_index+self.num_train, :]
+        self.y_test_1 = y[self.start_index+self.num_train:self.start_index+self.num_train + self.num_test, :]
 
-        X_train  = Variable(Tensor(self.X_train_orig ))
-        X_test = Variable(Tensor(self.X_test_orig))
-
-        self.X_train = reshape(X_train, (X_train.shape[0], X_train.shape[2] * X_train.shape[1], 1))
-        self.X_test = reshape(X_test, (X_test.shape[0], X_test.shape[2] * X_test.shape[1], 1))
+        # Various formats/shapes 
+        X_train_2  = Variable(Tensor(self.X_train_1))
+        X_test_2 = Variable(Tensor(self.X_test_1))
+        y_train_2 = Variable(Tensor(self.y_train_1))
+        y_test_2 = Variable(Tensor(self.y_test_1))
         
-        y_train = Variable(Tensor(self.y_train_orig))
-        y_test = Variable(Tensor(self.y_test_orig))
+        # Used for CNN (+ Q)
+        self.X_train = reshape(X_train_2, (X_train_2.shape[0], X_train_2.shape[2] * X_train_2.shape[1], 1))
+        self.X_test = reshape(X_test_2, (X_test_2.shape[0], X_test_2.shape[2] * X_test_2.shape[1], 1))
+        self.y_train = reshape(Variable(Tensor([y_train_2[i,self.y_col] for i in range(y_train_2.shape[0])])), (y_train_2.shape[0], 1))
+        self.y_test = reshape(Variable(Tensor([y_test_2[i,self.y_col] for i in range(y_test_2.shape[0])])), (y_test_2.shape[0], 1))
 
-        self.y_train = reshape(Variable(Tensor([y_train[i,self.y_col] for i in range(y_train.shape[0])])), (y_train.shape[0], 1))
-        self.y_test = reshape(Variable(Tensor([y_test[i,self.y_col] for i in range(y_test.shape[0])])), (y_test.shape[0], 1))
-
-        self.y_train_orig = reshape(Variable(Tensor([self.y_train[i,self.y_col] for i in range(self.y_train.shape[0])])), (self.y_train.shape[0],))
-        self.y_test_orig = reshape(Variable(Tensor([self.y_test[i,self.y_col] for i in range(self.y_test.shape[0])])), (self.y_test.shape[0],))
+        # Used for q sequential model 
+        self.y_train_1 = reshape(Variable(Tensor([self.y_train[i,self.y_col] for i in range(self.y_train.shape[0])])), (self.y_train.shape[0],))
+        self.y_test_1 = reshape(Variable(Tensor([self.y_test[i,self.y_col] for i in range(self.y_test.shape[0])])), (self.y_test.shape[0],))
      
-        logger.debug("x_train[0] {} y_train[0] {}".format(self.X_train[0], self.y_train[0]))
-
+    '''
+    Write
+    write loss, timings, and some parameter choices to file  
+    '''
     def write(self, writefile) -> None:
         full_writefile = "../results/" + writefile
         logger.info("Writing results to {}".format(full_writefile))
@@ -98,7 +117,9 @@ class CryptoTimeSeriesModel(nn.Module):
                 self.batch_size, self.epochs, self.lr, self.train_loss, self.test_loss
             ]
             writer.writerow(row)
-
+    '''
+    Plot
+    '''
     def plot(self, plotfile) -> None:
         full_plotfile= "../plots/" + plotfile
         logger.info("Plotting results and saving to {}".format(full_plotfile))
