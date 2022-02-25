@@ -14,7 +14,7 @@ import pennylane.optimize as optimize
 import logging
 logging.basicConfig()
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 from model import CryptoTimeSeriesModel, num_qubits
 from utils import square_loss, layer

@@ -17,7 +17,7 @@ from pennylane.templates import AngleEmbedding, StronglyEntanglingLayers
 import logging
 logging.basicConfig()
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 from model import CryptoTimeSeriesModel, num_qubits
 from utils import layer
