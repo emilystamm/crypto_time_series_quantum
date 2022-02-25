@@ -21,11 +21,11 @@ from model import CryptoTimeSeriesModel, num_qubits
 from utils import square_loss, layer
 
 # num_qubits = 6
-# dev = qml.device("default.qubit", wires=num_qubits, shots=1000)
+dev = qml.device("default.qubit", wires=num_qubits, shots=1000)
 # dev = qml.device("default.qubit.torch", wires=num_qubits, shots=100)
-s3 = ("amazon-braket-qhack-2022", "test-5")
-device_arn="arn:aws:braket:::device/quantum-simulator/amazon/sv1"
-dev = qml.device("braket.aws.qubit",device_arn = device_arn, s3_destination_folder=s3, wires=num_qubits, shots=10)
+# s3 = ("amazon-braket-qhack-2022", "test-5")
+# device_arn="arn:aws:braket:::device/quantum-simulator/amazon/sv1"
+# dev = qml.device("braket.aws.qubit",device_arn = device_arn, s3_destination_folder=s3, wires=num_qubits, shots=10)
 
 '''
 QSequenceCryptoTimeSeriesModel
@@ -69,6 +69,7 @@ class QSequenceCryptoTimeSeriesModel(CryptoTimeSeriesModel):
         predictions_arr = np.array(
             [np.array(self.circuit(inputs=X[i], weights=weights)) for i in range(X.shape[0])]
         )
+        logger.debug(predictions_arr)
         # Processed results = predictions 
         predictions = self.postprocess_output(predictions_arr, bias)
         # Calculate and return square loss
