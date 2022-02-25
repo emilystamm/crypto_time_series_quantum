@@ -75,7 +75,7 @@ if __name__ == "__main__":
         lookback = 4,
         conv = [64, 32], 
         quantum=True
-    ),
+    )
     # Models to try out 
     # models = [model1, model2]
     # models = [model3]
