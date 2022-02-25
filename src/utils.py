@@ -6,6 +6,7 @@ Helper functions.
 """
 # Imports
 import pennylane as qml 
+
 from model import num_qubits
 
 def square_loss(labels, predictions):
@@ -30,3 +31,4 @@ def full_layer(weights):
     for wire in range(num_qubits-1):
         for wire2 in range(wire + 1, num_qubits):
             qml.CNOT(wires=[wire, wire2])
+

@@ -10,7 +10,6 @@ import numpy as np
 import pennylane as qml
 from pennylane.templates import AngleEmbedding, StronglyEntanglingLayers
 import pennylane.optimize as optimize
-import torch.nn as nn
 
 import logging
 logging.basicConfig()
@@ -20,12 +19,12 @@ logger.setLevel(logging.DEBUG)
 from model import CryptoTimeSeriesModel, num_qubits
 from utils import square_loss, layer
 
-# num_qubits = 6
+# Devices 
 dev = qml.device("default.qubit", wires=num_qubits, shots=1000)
-# dev = qml.device("default.qubit.torch", wires=num_qubits, shots=100)
-# s3 = ("amazon-braket-qhack-2022", "test-5")
+# s3 = ("amazon-braket-amazon-braket-emily-protiviti", "qhack-seq-sim")
 # device_arn="arn:aws:braket:::device/quantum-simulator/amazon/sv1"
-# dev = qml.device("braket.aws.qubit",device_arn = device_arn, s3_destination_folder=s3, wires=num_qubits, shots=10)
+# device_arn="arn:aws:braket:::device/qpu/ionq/ionQdevice"
+# dev = qml.device("braket.aws.qubit",device_arn = device_arn, s3_destination_folder=s3, wires=num_qubits, shots=10, parallel=True)
 
 '''
 QSequenceCryptoTimeSeriesModel

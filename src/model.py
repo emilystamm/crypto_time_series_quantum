@@ -5,6 +5,7 @@ CryptoTimeSeries base model; inherits from nn.Module
 ===================================================
 """
 # Imports 
+from asyncore import write
 import csv
 
 import pandas as pd
@@ -24,6 +25,15 @@ logger.setLevel(logging.INFO)
 # Set number of qubits, in this case equal to the 6 columns for angle embedding
 global num_qubits
 num_qubits = 6
+
+import string
+import random
+'''
+ID_Generator
+Helper function to create unique id for each run
+'''
+def id_generator(size=4, chars=string.ascii_uppercase + string.ascii_lowercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
 
 """
 CryptoTimeSeriesModel
@@ -53,6 +63,7 @@ class CryptoTimeSeriesModel(nn.Module):
         self.num_layers = num_layers
         self.weights = None 
         self.bias = None
+        self.id = id_generator()
 
     '''
     Read
@@ -119,6 +130,15 @@ class CryptoTimeSeriesModel(nn.Module):
         self.y_train_1 = reshape(Variable(Tensor(self.y_train)), (self.y_train.shape[0],1))
         self.y_test_1 = reshape(Variable(Tensor(self.y_test)), (self.y_test.shape[0],1))
 
+        # writefile = "preprocess.csv"
+        # # np.savetxt("../results/X_train_{}_{}".format(self.type, writefile), self.X_train_1, delimiter=",")
+        # # np.savetxt("../results/y_train_{}_{}".format(self.type, writefile), self.y_train_1, delimiter=",")
+        # # np.savetxt("../results/X_test_{}_{}".format(self.type, writefile), self.X_test_1, delimiter=",")
+        # # np.savetxt("../results/y_test_{}_{}".format(self.type, writefile), self.y_test_1, delimiter=",")
+        # # input()
+
+        
+
     '''
     Write
     write loss, timings, and some parameter choices to file  
@@ -129,15 +149,15 @@ class CryptoTimeSeriesModel(nn.Module):
         with open(full_writefile, 'a', newline='') as csv_file:
             writer = csv.writer(csv_file, delimiter=',')
             row = [
-                self.type, self.y_col,
+                self.id, self.type, self.y_col,
                 round(self.train_time,3), round(self.test_time,3), self.num_train, self.num_test, 
                 self.start_index,
                 self.batch_size, self.iterations, self.lr, self.train_loss, self.test_loss,
                 self.num_layers, self.conv, self.quantum, self.weights, self.bias
             ]
             writer.writerow(row)
-        np.savetxt("../results/y_test_{}_{}".format(self.type, writefile), self.invtransformed_y_test, delimiter=",")
-        np.savetxt("../results/y_predict_{}_{}".format(self.type,writefile), self.invtransformed_y_predict, delimiter=",")
+        np.savetxt("../results/y/y_test_{}_{}_{}".format(self.type, self.id, writefile), self.invtransformed_y_test, delimiter=",")
+        np.savetxt("../results/y/y_predict_{}_{}_{}".format(self.type,self.id, writefile), self.invtransformed_y_predict, delimiter=",")
 
     '''
     Inverse transform of y 
@@ -153,7 +173,7 @@ class CryptoTimeSeriesModel(nn.Module):
     Plot
     '''
     def plot(self, plotfile, y_preds = {}) -> None:
-        full_plotfile= "../plots/" + plotfile
+        full_plotfile= "../plots/" + self.id + "_" + plotfile
         logger.info("Plotting results and saving to {}".format(full_plotfile))
         fig, (ax1) = plt.subplots(1,1, figsize=(10,6))
         display_dates = np.array(self.dates)
@@ -166,5 +186,6 @@ class CryptoTimeSeriesModel(nn.Module):
         ax1.set_xticklabels(display_dates[::8], rotation=30)
         ax1.set_title('Crypto Time-Series Prediction\nLoss: {}'.format(round(float(self.test_loss),7)), fontsize=14)
         plt.savefig(full_plotfile)
+
 
 

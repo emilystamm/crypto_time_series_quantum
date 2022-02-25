@@ -17,15 +17,18 @@ from pennylane.templates import AngleEmbedding, StronglyEntanglingLayers
 import logging
 logging.basicConfig()
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 from model import CryptoTimeSeriesModel, num_qubits
 from utils import layer
 
-# dev = qml.device("default.qubit", wires=num_qubits)
-s3 = ("amazon-braket-qhack-2022", "test-6")
-device_arn="arn:aws:braket:::device/quantum-simulator/amazon/sv1"
-dev = qml.device("braket.aws.qubit",device_arn = device_arn, s3_destination_folder=s3, wires=num_qubits, shots=10)
+# Devices
+dev = qml.device("default.qubit", wires=num_qubits)
+# s3 = ("amazon-braket-amazon-braket-emily-protiviti", "qhack-rigettim1-conv-2")
+# device_arn="arn:aws:braket:::device/quantum-simulator/amazon/sv1"
+# device_arn="arn:aws:braket:::device/qpu/ionq/ionQdevice"
+# device_arn = "arn:aws:braket:us-west-1::device/qpu/rigetti/Aspen-M-1"
+# dev = qml.device("braket.aws.qubit",device_arn = device_arn, s3_destination_folder=s3, wires=num_qubits, shots=100, parallel=True)
 
 """
 ConvCryptoTimeSeriesModel
@@ -64,12 +67,11 @@ class ConvCryptoTimeSeriesModel(CryptoTimeSeriesModel):
         # Quantum layer
         if self.quantum: 
             self.qlayer = qml.qnn.TorchLayer(qnode = self.circuit, weight_shapes = weight_shapes)
-            self.qlayer2 = qml.qnn.TorchLayer(qnode = self.circuit2, weight_shapes = weight_shapes)
+            # self.qlayer2 = qml.qnn.TorchLayer(qnode = self.circuit2, weight_shapes = weight_shapes)
         # Else use linear layers instead 
         else:
             self.fc2 = nn.Linear(6, 6)
-            self.fc2 = nn.Linear(6, 6)
-        self.fc2 = nn.Linear(6, 1)
+        self.fc3 = nn.Linear(6, 1)
         # Use Adam optimizer 
         self.optimizer = torch.optim.Adam(self.parameters(), self.lr)
 
@@ -95,9 +97,11 @@ class ConvCryptoTimeSeriesModel(CryptoTimeSeriesModel):
         if self.quantum: 
             x = self.qlayer(x)
             logger.debug("Shape: {}".format(x.shape))
-            x = self.qlayer2(x)
-            logger.debug("Shape: {}".format(x.shape))
-        x = self.fc2(x)
+            # x = self.qlayer2(x)
+            # logger.debug("Shape: {}".format(x.shape))
+        else: 
+            x = self.fc2(x)
+        x = self.fc3(x)
         logger.debug("Shape: {}".format(x.shape))
         return x
 
@@ -144,6 +148,7 @@ class ConvCryptoTimeSeriesModel(CryptoTimeSeriesModel):
     '''
     @qml.qnode(dev)
     def circuit(inputs, weights):
+        logger.debug("Call circuit {} {}".format(inputs, weights))
         AngleEmbedding(inputs, wires=range(num_qubits))
         StronglyEntanglingLayers(weights, wires=range(num_qubits))
         return [qml.expval(qml.PauliZ(wires=i)) for i in range(num_qubits)]

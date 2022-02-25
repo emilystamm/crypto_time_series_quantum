@@ -12,12 +12,12 @@ if __name__ == "__main__":
     datafile = "ETH-USD.csv"
     index_col =  "Date"
     y_col = 0
-    writefile = "feb24.csv"
+    writefile = "feb25.csv"
     num_train = 100
     num_test = 50
-    batch_size = 10
-    start_index = 400
-    lookback = 5
+    batch_size = 5
+    start_index = 200
+    lookback = 4
     lr = .005
     y_test = None
     y_preds = {}
@@ -26,34 +26,34 @@ if __name__ == "__main__":
     model1 = ConvCryptoTimeSeriesModel(
         num_train = num_train, 
         num_test = num_test,
-        iterations = 10000,
+        iterations = 1000,
         lr = lr,
         batch_size = batch_size,
         start_index = start_index,
         lookback = lookback,
-        conv = [64, 32], 
+        conv = [128, 64],
         quantum=False
     )
     model2 = ConvCryptoTimeSeriesModel(
         num_train = num_train, 
         num_test = num_test,
-        iterations = 10000,
+        iterations = 1000,
         lr = lr,
         batch_size = batch_size,
         start_index = start_index,
         lookback = lookback,
-        conv = [64, 32], 
+        conv = [128, 64], 
         quantum=True
     )
     model3 = QSequenceCryptoTimeSeriesModel(
         num_train = num_train, 
         num_test = num_test,
-        iterations = 500,
+        iterations = 100,
         lr = lr,
         batch_size = batch_size,
         start_index = start_index,
         lookback = lookback,
-        num_layers = 3,
+        num_layers = 2,
     )
     model4 = QSequenceCryptoTimeSeriesModel(
         num_train = 20, 
@@ -79,7 +79,7 @@ if __name__ == "__main__":
     # Models to try out 
     # models = [model1, model2]
     # models = [model3]
-    models = [model5]
+    models = [model1, model2]
 
     # Run each model
     for i in range(len(models)):
