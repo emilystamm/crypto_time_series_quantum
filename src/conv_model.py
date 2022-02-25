@@ -1,3 +1,10 @@
+"""
+===================================================
+CONV_MODEL.PY
+CryptoTimeSeries base model; inherits from nn.Module
+===================================================
+"""
+# Imports 
 import time
 from matplotlib.pyplot import xkcd 
 import numpy as np
@@ -17,14 +24,18 @@ from utils import layer
 
 dev = qml.device("default.qubit", wires=num_qubits)
 
+"""
+ConvCryptoTimeSeriesModel
+Convolutional and hybrid class; inherits from CryptoTimeSeriesModel.
+"""
 class ConvCryptoTimeSeriesModel(CryptoTimeSeriesModel):
     '''
     Init
     '''
     def __init__(self,
-        num_train, num_test, epochs, lr, batch_size,start_index, lookback, conv, quantum
+        num_train, num_test, iterations, lr, batch_size,start_index, lookback, conv, quantum
     ) -> None:
-        super(ConvCryptoTimeSeriesModel, self).__init__(num_train, num_test, epochs, lr, batch_size,start_index, lookback, conv=conv, quantum=quantum)
+        super(ConvCryptoTimeSeriesModel, self).__init__(num_train, num_test, iterations, lr, batch_size,start_index, lookback, conv=conv, quantum=quantum)
         if self.quantum: self.type =  "CNN_Quantum"
         else: self.type = "CNN"
     '''
@@ -46,17 +57,17 @@ class ConvCryptoTimeSeriesModel(CryptoTimeSeriesModel):
             in_channels=self.conv[0], out_channels=self.conv[1], kernel_size=3, stride=3, padding=5, bias=True
         )
         self.pool2 = nn.MaxPool1d(3)
-
-        # self.pool1 = nn.MaxPool1d(self.lookback)
         self.fc1 = nn.Linear(self.conv[1], 6)
         # Quantum layer
         if self.quantum: 
             self.qlayer = qml.qnn.TorchLayer(qnode = self.circuit, weight_shapes = weight_shapes)
             self.qlayer2 = qml.qnn.TorchLayer(qnode = self.circuit2, weight_shapes = weight_shapes)
+        # Else use linear layers instead 
         else:
             self.fc2 = nn.Linear(6, 6)
             self.fc2 = nn.Linear(6, 6)
         self.fc2 = nn.Linear(6, 1)
+        # Use Adam optimizer 
         self.optimizer = torch.optim.Adam(self.parameters(), self.lr)
 
     '''
@@ -93,7 +104,7 @@ class ConvCryptoTimeSeriesModel(CryptoTimeSeriesModel):
     def train(self) -> None:
         logger.info("Begin training.")
         start = time.time() 
-        for epoch in range(self.epochs):
+        for iteration in range(self.iterations):
             batch_index = np.random.randint(0, self.y_train.shape[0], (self.batch_size))
             X_batch = self.X_train[batch_index]
             y_batch = self.y_train[batch_index]
@@ -103,7 +114,7 @@ class ConvCryptoTimeSeriesModel(CryptoTimeSeriesModel):
             loss = self.criterion(outputs, y_batch)
             loss.backward()
             self.optimizer.step()
-            if epoch % 100 == 0: logger.info("Epoch: {} loss: {}".format(epoch, loss.detach().numpy()))
+            if iteration % 100 == 0: logger.info("Iteration: {} loss: {}".format(iteration, loss.detach().numpy()))
         self.train_loss = loss.detach().numpy()
         self.train_time = time.time() - start 
         logger.debug("Loss: {}".format(loss))
@@ -136,8 +147,8 @@ class ConvCryptoTimeSeriesModel(CryptoTimeSeriesModel):
 
 
     '''
-    Circuit
-    for quantum layer
+    Circuit2
+    for alternate quantum layer
     '''
     @qml.qnode(dev)
     def circuit2(inputs, weights):

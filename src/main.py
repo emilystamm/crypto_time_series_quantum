@@ -1,8 +1,11 @@
-import pandas as pd 
-
+"""
+===================================================
+MAIN.PY
+===================================================
+"""
+# Imports
 from conv_model import ConvCryptoTimeSeriesModel
 from q_seq_model import QSequenceCryptoTimeSeriesModel
-# from lstm_model import LSTMCryptoTimeSeriesModel
 
 if __name__ == "__main__":
     # Define standard variables
@@ -13,7 +16,7 @@ if __name__ == "__main__":
     num_train = 100
     num_test = 50
     batch_size = 10
-    start_index = 200
+    start_index = 400
     lookback = 5
     lr = .005
     y_test = None
@@ -23,37 +26,38 @@ if __name__ == "__main__":
     model1 = ConvCryptoTimeSeriesModel(
         num_train = num_train, 
         num_test = num_test,
-        epochs = 1000,
+        iterations = 10000,
         lr = lr,
         batch_size = batch_size,
         start_index = start_index,
         lookback = lookback,
-        conv = [128, 64], 
+        conv = [64, 32], 
         quantum=False
     )
     model2 = ConvCryptoTimeSeriesModel(
         num_train = num_train, 
         num_test = num_test,
-        epochs = 1000,
+        iterations = 10000,
         lr = lr,
         batch_size = batch_size,
         start_index = start_index,
         lookback = lookback,
-        conv = [128, 64], 
+        conv = [64, 32], 
         quantum=True
     )
     model3 = QSequenceCryptoTimeSeriesModel(
         num_train = num_train, 
         num_test = num_test,
-        epochs = 1000,
+        iterations = 500,
         lr = lr,
         batch_size = batch_size,
         start_index = start_index,
         lookback = lookback,
-        num_layers = 2,
+        num_layers = 3,
     )
     # Models to try out 
-    models = [model1]
+    models = [model1, model2]
+    # models = [model3]
 
     # Run each model
     for i in range(len(models)):
@@ -63,13 +67,14 @@ if __name__ == "__main__":
         if type(model) == ConvCryptoTimeSeriesModel: model.initialize_layers()
         model.train()
         model.test()
-        model.write(writefile=writefile)
         y_test, y_pred_i = model.invtransform_y()
+        model.write(writefile=writefile)
         if i > 0: y_preds[model.type] = y_pred_i
         plotfile = "{}_class_{}_ex_{}.png".format(model.type, model.y_col, 3)
         model.plot(plotfile=plotfile)
 
     # Plot final results
-    # model1.plot(plotfile="Multiple_class_{}_ex_{}".format(model1.y_col, 3), y_preds=y_preds)
+    if len(models) > 1:
+        model1.plot(plotfile="Multiple_class_{}_ex_{}".format(model1.y_col, 3), y_preds=y_preds)
 
 

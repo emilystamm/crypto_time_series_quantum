@@ -1,15 +1,18 @@
+"""
+===================================================
+MODEL.PY
+CryptoTimeSeries base model; inherits from nn.Module
+===================================================
+"""
+# Imports 
 import csv
-import time
 
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import pennylane as qml
-from pennylane import QNode
 
-import torch 
 import torch.nn as nn
-from torch import Tensor,  reshape
+from torch import Tensor, reshape
 from torch.autograd import Variable 
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
@@ -18,15 +21,20 @@ logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+# Set number of qubits, in this case equal to the 6 columns for angle embedding
 global num_qubits
 num_qubits = 6
 
+"""
+CryptoTimeSeriesModel
+Base model for reading and preprocessing data, and writing and plotting results.
+"""
 class CryptoTimeSeriesModel(nn.Module):
     '''
     Init
     '''
     def __init__(self,
-        num_train, num_test, epochs, lr, batch_size,start_index, lookback,
+        num_train, num_test, iterations, lr, batch_size,start_index, lookback,
         quantum=None, conv=None, num_layers = None
     ) -> None:
         logger.info("Initialize model.")
@@ -34,7 +42,7 @@ class CryptoTimeSeriesModel(nn.Module):
         # Initialize 
         self.num_train = num_train
         self.num_test = num_test
-        self.epochs = epochs
+        self.iterations = iterations
         self.lr = lr
         self.batch_size = batch_size
         self.criterion = nn.MSELoss()
@@ -43,6 +51,8 @@ class CryptoTimeSeriesModel(nn.Module):
         self.quantum = quantum
         self.conv = conv
         self.num_layers = num_layers
+        self.weights = None 
+        self.bias = None
 
     '''
     Read
@@ -108,6 +118,7 @@ class CryptoTimeSeriesModel(nn.Module):
         # Used for q sequential model 
         self.y_train_1 = reshape(Variable(Tensor(self.y_train)), (self.y_train.shape[0],1))
         self.y_test_1 = reshape(Variable(Tensor(self.y_test)), (self.y_test.shape[0],1))
+
     '''
     Write
     write loss, timings, and some parameter choices to file  
@@ -121,10 +132,13 @@ class CryptoTimeSeriesModel(nn.Module):
                 self.type, self.y_col,
                 round(self.train_time,3), round(self.test_time,3), self.num_train, self.num_test, 
                 self.start_index,
-                self.batch_size, self.epochs, self.lr, self.train_loss, self.test_loss,
-                self.num_layers, self.conv, self.quantum
+                self.batch_size, self.iterations, self.lr, self.train_loss, self.test_loss,
+                self.num_layers, self.conv, self.quantum, self.weights, self.bias
             ]
             writer.writerow(row)
+        np.savetxt("../results/y_test_{}_{}".format(self.type, writefile), self.invtransformed_y_test, delimiter=",")
+        np.savetxt("../results/y_predict_{}_{}".format(self.type,writefile), self.invtransformed_y_predict, delimiter=",")
+
     '''
     Inverse transform of y 
     '''
@@ -134,6 +148,7 @@ class CryptoTimeSeriesModel(nn.Module):
         self.invtransformed_y_predict = self.mm.inverse_transform(
             reshape(Variable(Tensor(self.y_data_predict)),  (self.y_data_predict.shape[0], 1)))
         return self.invtransformed_y_test, self.invtransformed_y_predict
+        
     '''
     Plot
     '''
@@ -141,20 +156,14 @@ class CryptoTimeSeriesModel(nn.Module):
         full_plotfile= "../plots/" + plotfile
         logger.info("Plotting results and saving to {}".format(full_plotfile))
         fig, (ax1) = plt.subplots(1,1, figsize=(10,6))
-        # plt.figure(figsize=(10,6)) 
         display_dates = np.array(self.dates)
-        # ax1.xticks(range(0, self.num_test), display_dates[::2], rotation='vertical')
-
         ax1.plot(display_dates, self.invtransformed_y_test, label='Actual Data')
         ax1.plot(display_dates, self.invtransformed_y_predict, label='{} Predicted Data'.format(self.type))
-        # ax1.plot(display_dates[0:5], self.invtransformed_y_predict[0:5], label='{} Predicted Data2'.format(self.type))
-
         for y_pred_type in y_preds.keys():
             ax1.plot(display_dates, y_preds[y_pred_type], label='{} Predicted Data'.format(y_pred_type))
         ax1.legend()
         ax1.set_xticks(display_dates[::8])
         ax1.set_xticklabels(display_dates[::8], rotation=30)
-        # plt.xticks(np.arange(display_dates[0],display_dates[display_dates.shape[0]-1], 10))
         ax1.set_title('Crypto Time-Series Prediction\nLoss: {}'.format(round(float(self.test_loss),7)), fontsize=14)
         plt.savefig(full_plotfile)
 

@@ -1,3 +1,10 @@
+"""
+===================================================
+UTILS.PY
+Helper functions.
+===================================================
+"""
+# Imports
 import pennylane as qml 
 from model import num_qubits
 
