@@ -55,9 +55,20 @@ if __name__ == "__main__":
         lookback = lookback,
         num_layers = 3,
     )
+    model4 = QSequenceCryptoTimeSeriesModel(
+        num_train = 20, 
+        num_test = 10,
+        iterations = 1,
+        lr = lr,
+        batch_size = 5,
+        start_index = 0,
+        lookback = 4,
+        num_layers = 2,
+    )
     # Models to try out 
-    models = [model1, model2]
+    # models = [model1, model2]
     # models = [model3]
+    models = [model4]
 
     # Run each model
     for i in range(len(models)):
@@ -70,11 +81,11 @@ if __name__ == "__main__":
         y_test, y_pred_i = model.invtransform_y()
         model.write(writefile=writefile)
         if i > 0: y_preds[model.type] = y_pred_i
-        plotfile = "{}_class_{}_ex_{}.png".format(model.type, model.y_col, 3)
+        plotfile = "{}_class_{}_start_{}.png".format(model.type, model.y_col, start_index)
         model.plot(plotfile=plotfile)
 
     # Plot final results
     if len(models) > 1:
-        model1.plot(plotfile="Multiple_class_{}_ex_{}".format(model1.y_col, 3), y_preds=y_preds)
+        model1.plot(plotfile="Multiple_class_{}_index_{}".format(model1.y_col, start_index), y_preds=y_preds)
 
 
