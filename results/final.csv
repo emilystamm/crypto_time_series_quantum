@@ -1,0 +1,1 @@
+ID, Type,YIndex,TrainTime,TestTime,NumTrain,NumTest,StartIndex,BatchSize,Epochs,LR,TrainLoss,TestLoss,NumLayersQSeq,ConvLayers,CNNQuantum
