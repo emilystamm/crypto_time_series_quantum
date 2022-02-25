@@ -73,7 +73,6 @@ if __name__ == "__main__":
         batch_size = 5,
         start_index = 0,
         lookback = 4,
-        num_layers = 2,
         conv = [64, 32], 
         quantum=True
     ),
