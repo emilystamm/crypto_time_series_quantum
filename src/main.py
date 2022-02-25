@@ -12,7 +12,7 @@ if __name__ == "__main__":
     datafile = "ETH-USD.csv"
     index_col =  "Date"
     y_col = 0
-    writefile = "feb25.csv"
+    writefile = "final.csv"
     num_train = 100
     num_test = 50
     batch_size = 5
@@ -48,7 +48,7 @@ if __name__ == "__main__":
     model3 = QSequenceCryptoTimeSeriesModel(
         num_train = num_train, 
         num_test = num_test,
-        iterations = 100,
+        iterations = 50,
         lr = lr,
         batch_size = batch_size,
         start_index = start_index,

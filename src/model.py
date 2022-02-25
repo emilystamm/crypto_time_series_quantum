@@ -130,13 +130,6 @@ class CryptoTimeSeriesModel(nn.Module):
         self.y_train_1 = reshape(Variable(Tensor(self.y_train)), (self.y_train.shape[0],1))
         self.y_test_1 = reshape(Variable(Tensor(self.y_test)), (self.y_test.shape[0],1))
 
-        # writefile = "preprocess.csv"
-        # # np.savetxt("../results/X_train_{}_{}".format(self.type, writefile), self.X_train_1, delimiter=",")
-        # # np.savetxt("../results/y_train_{}_{}".format(self.type, writefile), self.y_train_1, delimiter=",")
-        # # np.savetxt("../results/X_test_{}_{}".format(self.type, writefile), self.X_test_1, delimiter=",")
-        # # np.savetxt("../results/y_test_{}_{}".format(self.type, writefile), self.y_test_1, delimiter=",")
-        # # input()
-
         
 
     '''
@@ -155,10 +148,10 @@ class CryptoTimeSeriesModel(nn.Module):
                 self.batch_size, self.iterations, self.lr, self.train_loss, self.test_loss,
                 self.num_layers, self.conv, self.quantum, self.weights, self.bias
             ]
+            row = row[0:-2]
+            if self.type == "QuantumSequenceCircuit": row = row[0:-2]
             writer.writerow(row)
-        np.savetxt("../results/y/y_test_{}_{}_{}".format(self.type, self.id, writefile), self.invtransformed_y_test, delimiter=",")
-        np.savetxt("../results/y/y_predict_{}_{}_{}".format(self.type,self.id, writefile), self.invtransformed_y_predict, delimiter=",")
-
+        
     '''
     Inverse transform of y 
     '''

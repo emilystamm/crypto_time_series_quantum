@@ -38,7 +38,6 @@ class QSequenceCryptoTimeSeriesModel(CryptoTimeSeriesModel):
         num_train, num_test, iterations, lr, batch_size,start_index, lookback, num_layers
     ) -> None:
         super(QSequenceCryptoTimeSeriesModel, self).__init__(num_train, num_test, iterations, lr, batch_size,start_index, lookback, num_layers=num_layers)
-        # self.optimizer = optimize.AdamOptimizer(stepsize=.02) 
         self.optimizer = optimize.NesterovMomentumOptimizer(stepsize=self.lr, momentum=0.9)
         self.type = "QuantumSequenceCircuit"
 
