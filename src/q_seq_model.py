@@ -15,17 +15,17 @@ import torch.nn as nn
 import logging
 logging.basicConfig()
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 from model import CryptoTimeSeriesModel, num_qubits
 from utils import square_loss, layer
 
 # num_qubits = 6
-dev = qml.device("default.qubit", wires=num_qubits, shots=1000)
+# dev = qml.device("default.qubit", wires=num_qubits, shots=1000)
 # dev = qml.device("default.qubit.torch", wires=num_qubits, shots=100)
-# s3 = ("emily-braket-qhack", "test")
-# device_arn="arn:aws:braket:::device/quantum-simulator/amazon/sv1"
-# dev = qml.device("braket.aws.qubit",device_arn = device_arn, s3_destination_folder=s3, wires=num_qubits, shots=1)
+s3 = ("amazon-braket-qhack-2022", "test-5")
+device_arn="arn:aws:braket:::device/quantum-simulator/amazon/sv1"
+dev = qml.device("braket.aws.qubit",device_arn = device_arn, s3_destination_folder=s3, wires=num_qubits, shots=10)
 
 '''
 QSequenceCryptoTimeSeriesModel
