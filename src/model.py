@@ -16,7 +16,7 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler
 import logging
 logging.basicConfig()
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 global num_qubits
 num_qubits = 6
@@ -26,7 +26,8 @@ class CryptoTimeSeriesModel(nn.Module):
     Init
     '''
     def __init__(self,
-        num_train, num_test, epochs, lr, batch_size,start_index, lookback
+        num_train, num_test, epochs, lr, batch_size,start_index, lookback,
+        quantum=None, conv=None, num_layers = None
     ) -> None:
         logger.info("Initialize model.")
         super(CryptoTimeSeriesModel, self).__init__()
@@ -39,6 +40,9 @@ class CryptoTimeSeriesModel(nn.Module):
         self.criterion = nn.MSELoss()
         self.start_index = start_index
         self.lookback= lookback
+        self.quantum = quantum
+        self.conv = conv
+        self.num_layers = num_layers
 
     '''
     Read
@@ -117,14 +121,14 @@ class CryptoTimeSeriesModel(nn.Module):
                 self.type, self.y_col,
                 round(self.train_time,3), round(self.test_time,3), self.num_train, self.num_test, 
                 self.start_index,
-                self.batch_size, self.epochs, self.lr, self.train_loss, self.test_loss
+                self.batch_size, self.epochs, self.lr, self.train_loss, self.test_loss,
+                self.num_layers, self.conv, self.quantum
             ]
             writer.writerow(row)
     '''
     Inverse transform of y 
     '''
     def invtransform_y(self):
-        # Revert transformation 
         self.invtransformed_y_test = self.mm.inverse_transform(
             reshape(Variable(Tensor(self.y_data_test)),  (self.y_data_test.shape[0], 1)))
         self.invtransformed_y_predict = self.mm.inverse_transform(
@@ -136,14 +140,22 @@ class CryptoTimeSeriesModel(nn.Module):
     def plot(self, plotfile, y_preds = {}) -> None:
         full_plotfile= "../plots/" + plotfile
         logger.info("Plotting results and saving to {}".format(full_plotfile))
-        # Plot 
-        plt.figure(figsize=(10,6)) 
-        plt.plot(self.dates, self.invtransformed_y_test, label='Actual Data')
-        plt.plot(self.dates, self.invtransformed_y_predict, label='{} Predicted Data'.format(self.type))
+        fig, (ax1) = plt.subplots(1,1, figsize=(10,6))
+        # plt.figure(figsize=(10,6)) 
+        display_dates = np.array(self.dates)
+        # ax1.xticks(range(0, self.num_test), display_dates[::2], rotation='vertical')
+
+        ax1.plot(display_dates, self.invtransformed_y_test, label='Actual Data')
+        ax1.plot(display_dates, self.invtransformed_y_predict, label='{} Predicted Data'.format(self.type))
+        # ax1.plot(display_dates[0:5], self.invtransformed_y_predict[0:5], label='{} Predicted Data2'.format(self.type))
+
         for y_pred_type in y_preds.keys():
-            plt.plot(self.dates, y_preds[y_pred_type], label='{} Predicted Data'.format(y_pred_type))
-        plt.legend()
-        plt.title('Crypto Time-Series Prediction\nLoss: {}'.format(round(float(self.test_loss),7)), fontsize=14)
+            ax1.plot(display_dates, y_preds[y_pred_type], label='{} Predicted Data'.format(y_pred_type))
+        ax1.legend()
+        ax1.set_xticks(display_dates[::8])
+        ax1.set_xticklabels(display_dates[::8], rotation=30)
+        # plt.xticks(np.arange(display_dates[0],display_dates[display_dates.shape[0]-1], 10))
+        ax1.set_title('Crypto Time-Series Prediction\nLoss: {}'.format(round(float(self.test_loss),7)), fontsize=14)
         plt.savefig(full_plotfile)
 
 
