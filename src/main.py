@@ -16,7 +16,7 @@ if __name__ == "__main__":
     num_train = 100
     num_test = 50
     batch_size = 5
-    start_index = 200
+    start_index = 1500
     lookback = 4
     lr = .005
     y_test = None
