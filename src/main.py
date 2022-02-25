@@ -16,8 +16,8 @@ if __name__ == "__main__":
     num_train = 100
     num_test = 50
     batch_size = 5
-    start_index = 1500
-    lookback = 4
+    start_index = 200
+    lookback = 6
     lr = .005
     y_test = None
     y_preds = {}
@@ -55,31 +55,7 @@ if __name__ == "__main__":
         lookback = lookback,
         num_layers = 2,
     )
-    model4 = QSequenceCryptoTimeSeriesModel(
-        num_train = 20, 
-        num_test = 10,
-        iterations = 1,
-        lr = lr,
-        batch_size = 5,
-        start_index = 0,
-        lookback = 4,
-        num_layers = 2,
-    )
-    model5 = ConvCryptoTimeSeriesModel(
-        num_train = 20, 
-        num_test = 10,
-        iterations = 1,
-        lr = lr,
-        batch_size = 5,
-        start_index = 0,
-        lookback = 4,
-        conv = [64, 32], 
-        quantum=True
-    )
-    # Models to try out 
-    # models = [model1, model2]
-    # models = [model3]
-    models = [model1, model2]
+    models = [model1, model2, model3]
 
     # Run each model
     for i in range(len(models)):
