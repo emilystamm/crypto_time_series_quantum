@@ -65,10 +65,22 @@ if __name__ == "__main__":
         lookback = 4,
         num_layers = 2,
     )
+    model5 = QSequenceCryptoTimeSeriesModel(
+        num_train = 20, 
+        num_test = 10,
+        iterations = 1,
+        lr = lr,
+        batch_size = 5,
+        start_index = 0,
+        lookback = 4,
+        num_layers = 2,
+        conv = [64, 32], 
+        quantum=True
+    ),
     # Models to try out 
     # models = [model1, model2]
     # models = [model3]
-    models = [model4]
+    models = [model5]
 
     # Run each model
     for i in range(len(models)):

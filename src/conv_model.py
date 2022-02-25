@@ -22,7 +22,10 @@ logger.setLevel(logging.INFO)
 from model import CryptoTimeSeriesModel, num_qubits
 from utils import layer
 
-dev = qml.device("default.qubit", wires=num_qubits)
+# dev = qml.device("default.qubit", wires=num_qubits)
+s3 = ("amazon-braket-qhack-2022", "test-6")
+device_arn="arn:aws:braket:::device/quantum-simulator/amazon/sv1"
+dev = qml.device("braket.aws.qubit",device_arn = device_arn, s3_destination_folder=s3, wires=num_qubits, shots=10)
 
 """
 ConvCryptoTimeSeriesModel
