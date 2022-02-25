@@ -1,4 +1,4 @@
-# Crypto Forecasting with Quantum Machine Learning
+# Cryptocurrency Forecasting with Quantum Machine Learning 
 This repository contains several (quantum) machine learning algorithms to predict cryptocurrency prices.
 
 ## Summary 
