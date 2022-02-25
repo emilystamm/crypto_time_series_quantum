@@ -65,7 +65,7 @@ if __name__ == "__main__":
         lookback = 4,
         num_layers = 2,
     )
-    model5 = QSequenceCryptoTimeSeriesModel(
+    model5 = ConvCryptoTimeSeriesModel(
         num_train = 20, 
         num_test = 10,
         iterations = 1,
