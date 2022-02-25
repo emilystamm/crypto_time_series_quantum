@@ -2,7 +2,7 @@
 This repository contains several (quantum) machine learning algorithms to predict cryptocurrency prices.
 
 ## Summary 
-Cryptocurrencies are notoriously volatile and challenging to predict, however, there is a great financial incentive in predicting their value. The purpose of this project is to compare quantum and classical machine learning methods for time series forecasting of cryptocurrency. In particular, this project analyzes the value of Ethereum, between 2015 and 2021 [Kaggle Ethereum Data - Arpit Verma](https://www.kaggle.com/varpit94/ethereum-data). There is a base model (model.py) used for loading and preprocessing data, and writing and plotting results, and the specific machine learning models (conv_model.py, q_seq_model.py) inherit from this model and implment functions for training and testing data. This project includes implementations of CNN, CNN with a quantum layer, and a  variational quantum algorithm. 
+Cryptocurrencies are notoriously volatile and challenging to predict, however, there is a great financial incentive in predicting their value. The purpose of this project is to compare quantum and classical machine learning methods for time series forecasting of cryptocurrency. In particular, this project analyzes the value of Ethereum, between 2015 and 2021 [Kaggle Ethereum Data - Arpit Verma](https://www.kaggle.com/varpit94/ethereum-data). There is a base model (model.py) used for loading and preprocessing data, and writing and plotting results, and the specific machine learning models (conv_model.py, q_seq_model.py) inherit from this model and implment functions for training and testing data. This project includes implementations of CNN, CNN with a quantum layer, and a custom variational quantum algorithm. 
 
 ## Usage
 First, create a [conda environemnt](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-with-commands)  for PennyLane. Then install requirements:
@@ -15,10 +15,10 @@ cd src
 python3 main.py
 ``` 
 
-### Data
+## Data
 The data used is the price of the Ethereum cryptocurrency 2015 - 2021, including the Open, High, Low, Close, Adjusted Close, and Volume for each day. The dataset used is [Kaggle Ethereum Data - Arpit Verma](https://www.kaggle.com/varpit94/ethereum-data).
 
-### Software and Services 
+## Software and Services 
 Software and services used include:
 * PennyLane: for the Hybrid CNN and Variational Algorithm
 * Braket: for running on simulators 
